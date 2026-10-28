@@ -1,0 +1,10 @@
+# universo de prueba
+MSFT
+NVDA
+AVGO
+SMCI
+ASML
+AAPL
+RIVN
+BRK-B
+COST

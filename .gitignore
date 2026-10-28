@@ -1,0 +1,16 @@
+# Entorno virtual: contiene rutas absolutas de la máquina (pyvenv.cfg) y cientos de MB
+.venv/
+__pycache__/
+*.pyc
+
+# Caché de descargas de EDGAR: datos públicos, pero 350+ MB y se regenera sola
+.cache_edgar/
+
+# Salidas generadas por el screener (se regeneran con cada corrida)
+resultados*.csv
+resultados*.md
+prueba*.csv
+prueba*.md
+
+# Configuración local (User-Agent con correo real para EDGAR)
+.env

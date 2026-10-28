@@ -1,0 +1,10 @@
+﻿Ticker,Empresa,1 Rentabilidad,2 Clientes,3 Moat,4 FCF,5 Valuación,Pasa,Insiders 6m,13F activos/hedge
+MSFT,Microsoft Corporation,PASS,PASS,PASS,PASS,PASS,5,NINGUNA,19/30 activos/hedge (+7 -12 salio 1)
+NVDA,NVIDIA Corporation,PASS,WARN,WARN,PASS,PASS,3,NINGUNA,17/30 activos/hedge (+5 -6 salio 2)
+AVGO,Broadcom Inc.,PASS,FAIL,WARN,PASS,PASS,3,"DEBIL: 1 compras, 1 insiders (Director), $374K",15/30 activos/hedge (+7 -6 salio 4)
+SMCI,"Super Micro Computer, Inc.",PASS,FAIL,WARN,FAIL,PASS,2,NINGUNA,5/30 activos/hedge (+5 -0 salio 0)
+ASML,ASML Holding N.V.,PASS,PASS,WARN,PASS,PASS,4,N/A,12/30 activos/hedge (+6 -3 salio 1)
+AAPL,Apple Inc.,PASS,PASS,PASS,PASS,FAIL,4,NINGUNA,13/30 activos/hedge (+5 -3 salio 1)
+RIVN,"Rivian Automotive, Inc.",FAIL,PASS,FAIL,FAIL,FAIL,1,"DEBIL: 2 compras, 2 insiders (Director/10%-owner), $1.00B",7/30 activos/hedge (+3 -3 salio 0)
+BRK-B,Berkshire Hathaway Inc.,PASS,PASS,WARN,PASS,PASS,4,"DEBIL: 5 compras, 1 insiders (Officer), $501K",13/30 activos/hedge (+3 -6 salio 0)
+COST,Costco Wholesale Corporation,WARN,PASS,WARN,WARN,WARN,1,NINGUNA,8/30 activos/hedge (+0 -7 salio 0)
