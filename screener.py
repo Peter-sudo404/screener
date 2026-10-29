@@ -5,12 +5,15 @@ Uso:
     python screener.py MSFT AAPL NVDA
     python screener.py --file tickers.txt --out resultados
     python screener.py MSFT --no-sec        # salta EDGAR (filtro 2 queda N/A)
+    python screener.py MSFT --no-lse        # ignora LSE aunque LSE_KEY esté definida
 
 Fuentes:
     - yfinance (Yahoo Finance): estados financieros anuales (hasta 4 años),
       múltiplos, crecimiento, descripción del negocio.
     - SEC EDGAR: último 10-K, para buscar concentración de clientes.
       Solo aplica a empresas que reportan a la SEC (US-listed).
+    - LSE (opcional, solo si existe la variable de entorno LSE_KEY): segunda fuente de
+      márgenes para cruzar los filtros 1, 3 y 4. Solo agrega una nota; no cambia veredictos.
 
 El resultado es objetivo: PASS / WARN / FAIL / N/A por filtro, con nota.
 No es una recomendación de compra.
@@ -30,6 +33,8 @@ from dataclasses import dataclass, field
 import pandas as pd
 import yfinance as yf
 from tabulate import tabulate
+
+import lse
 
 # ----------------------------------------------------------------------------
 # Umbrales. Están aquí arriba para que sean fáciles de ajustar.
@@ -428,7 +433,46 @@ def f5_valuation(fin: pd.DataFrame, info: dict) -> FilterResult:
 FILTERS = ["1 Rentabilidad", "2 Clientes", "3 Moat", "4 FCF", "5 Valuación"]
 
 
-def screen(ticker: str, use_sec: bool) -> CompanyResult:
+def _yf_margin_series(fin: pd.DataFrame, cf: pd.DataFrame) -> tuple[dict, dict]:
+    """Margen operativo y margen FCF por fecha de cierre fiscal, como los usan los filtros 1, 3 y 4."""
+    rev = _row(fin, "Total Revenue", "Operating Revenue")
+    opi = _row(fin, "Operating Income", "Total Operating Income As Reported", "EBIT")
+    op: dict = {}
+    if rev is not None and opi is not None:
+        for d in rev.index.intersection(opi.index):
+            if rev.loc[d]:
+                op[pd.Timestamp(d).date()] = float(opi.loc[d] / rev.loc[d])
+    fcf = _row(cf, "Free Cash Flow")
+    if fcf is None:
+        ocf = _row(cf, "Operating Cash Flow")
+        capex = _row(cf, "Capital Expenditure")
+        if ocf is not None:
+            fcf = ocf + (capex.reindex(ocf.index).fillna(0) if capex is not None else 0)
+    fm: dict = {}
+    if fcf is not None and rev is not None:
+        for d in fcf.index.intersection(rev.index):
+            if rev.loc[d]:
+                fm[pd.Timestamp(d).date()] = float(fcf.loc[d] / rev.loc[d])
+    return op, fm
+
+
+def _append_lse_notes(r: CompanyResult, ticker: str, fin: pd.DataFrame, cf: pd.DataFrame) -> None:
+    """Cruza con LSE y agrega una nota a los filtros 1, 3 y 4. Nunca cambia un veredicto ni lanza."""
+    try:
+        op, fm = _yf_margin_series(fin, cf)
+        chk = lse.check(ticker, op, fm)
+    except Exception as e:  # noqa: BLE001
+        chk = lse.Check(False, f"LSE N/A: error ({type(e).__name__})")
+    if chk.ok:
+        notes = {"1 Rentabilidad": chk.op_note, "3 Moat": chk.op_note, "4 FCF": chk.fcf_note}
+    else:
+        notes = {f: chk.na_note for f in ("1 Rentabilidad", "3 Moat", "4 FCF")}
+    for f, note in notes.items():
+        if note and f in r.filters:
+            r.filters[f].note += f" | {note}"
+
+
+def screen(ticker: str, use_sec: bool, use_lse: bool = True) -> CompanyResult:
     r = CompanyResult(ticker=ticker.upper())
     try:
         t = yf.Ticker(ticker)
@@ -445,6 +489,8 @@ def screen(ticker: str, use_sec: bool) -> CompanyResult:
         r.filters["3 Moat"] = f3_moat(fin, info)
         r.filters["4 FCF"] = f4_fcf(cf, fin)
         r.filters["5 Valuación"] = f5_valuation(fin, info)
+        if use_lse and lse.available():
+            _append_lse_notes(r, ticker, fin, cf)
     except Exception as e:  # noqa: BLE001
         r.error = f"{type(e).__name__}: {str(e)[:120]}"
     return r
@@ -507,6 +553,7 @@ def main() -> None:
     ap.add_argument("--file", help="archivo con un ticker por línea")
     ap.add_argument("--out", default="resultados", help="prefijo de salida (.csv y .md)")
     ap.add_argument("--no-sec", action="store_true", help="no consultar EDGAR (filtro 2 = N/A)")
+    ap.add_argument("--no-lse", action="store_true", help="no consultar LSE aunque LSE_KEY esté definida")
     ap.add_argument("--no-insiders", action="store_true", help="omitir módulo Form 4 (compras de insiders)")
     ap.add_argument("--no-13f", action="store_true", help="omitir módulo 13F (institucionales)")
     ap.add_argument("--no-bottlenecks", action="store_true", help="omitir sección de cuellos de botella")
@@ -519,10 +566,13 @@ def main() -> None:
     if not tickers:
         ap.error("indica al menos un ticker o --file")
 
+    use_lse = not args.no_lse and lse.available()
+    if use_lse:
+        _log("... LSE activo (LSE_KEY definida): se cruzan márgenes de los filtros 1, 3 y 4")
     results = []
     for tk in tickers:
         _log(f"... {tk} (fundamentales)")
-        results.append(screen(tk, use_sec=not args.no_sec))
+        results.append(screen(tk, use_sec=not args.no_sec, use_lse=use_lse))
 
     # ---- Módulo 1: insiders
     if not args.no_insiders:
