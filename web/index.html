@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Screener</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:wght@400;500;600;700&display=swap">
+<style>
+body{margin:0;background:#0D1015;color:#E7EAEE;font:14px/1.45 'IBM Plex Sans',system-ui,sans-serif}
+*{box-sizing:border-box}
+a{color:#8DBBFF}a:hover{color:#B9D4FF}
+button,input,textarea{font:inherit}
+button:focus-visible,a:focus-visible,input:focus-visible,textarea:focus-visible{outline:2px solid #8DBBFF;outline-offset:2px}
+.mono{font-family:'IBM Plex Mono',monospace}
+.top{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:12px;padding:8px 32px;border-bottom:1px solid #222A34;background:#10141A}
+.nav{display:flex;flex-wrap:wrap;gap:4px}
+.nav button{display:inline-flex;align-items:center;min-height:44px;padding:0 14px;border-radius:6px;border:0;background:transparent;font-size:13px;font-weight:500;color:#B4BDC9;cursor:pointer}
+.nav button[aria-current=page]{color:#E7EAEE;background:#1C232D}
+main{max-width:1440px;margin:0 auto;padding:28px 32px 56px;display:flex;flex-direction:column;gap:20px}
+h1{margin:0;font-size:26px;font-weight:600;letter-spacing:-.01em}
+.card{border:1px solid #222A34;border-radius:8px;background:#141920}
+.seg{display:flex;flex-wrap:wrap;gap:4px;padding:4px;border:1px solid #222A34;border-radius:8px;background:#10141A}
+.seg button{min-height:36px;padding:0 12px;border-radius:5px;border:0;font-size:13px;cursor:pointer;background:transparent;color:#95A0AE}
+.seg button[aria-pressed=true]{background:#1C232D;color:#E7EAEE}
+.chip{display:inline-flex;align-items:center;justify-content:center;width:64px;height:26px;border-radius:4px;font-family:'IBM Plex Mono',monospace;font-size:12px;font-weight:600;letter-spacing:.04em;border:1px solid}
+.tag{justify-self:start;padding:1px 7px;border-radius:4px;border:1px solid #2A323D;font-size:11px;color:#B4BDC9}
+.btn{display:inline-flex;align-items:center;justify-content:center;min-height:44px;padding:0 14px;border-radius:6px;border:1px solid #2A323D;background:#141920;color:#E7EAEE;font-size:13px;cursor:pointer;text-decoration:none}
+.btn:hover{color:#E7EAEE;border-color:#3A4350}
+.h2s{margin:0;font-size:13px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:#95A0AE}
+.muted{color:#95A0AE}
+.rowbtn{display:grid;width:100%;border:0;color:inherit;text-align:left;cursor:pointer;background:transparent}
+.rowbtn:hover{background:#171E27}
+input[type=number]{-moz-appearance:textfield}
+</style>
+</head>
+<body>
+<div id="app"></div>
+<script src="/static/app.js"></script>
+</body>
+</html>

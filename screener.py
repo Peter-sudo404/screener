@@ -54,6 +54,7 @@ T = {
     "peg_warn": 3.0,
     "ev_ebitda_cheap": 12.0,        # si EV/EBITDA <= esto y crecimiento >= 0, pasa aunque no haya PEG
     "growth_cap": 0.40,             # crecimiento máximo que se acepta para calcular PEG (conservador)
+    "ev_ebitda_bad": 200.0,         # EV/EBITDA por encima de esto se descarta como dato corrupto (ADRs)
 }
 
 MOAT_KEYWORDS = {
@@ -373,7 +374,7 @@ def f5_valuation(fin: pd.DataFrame, info: dict) -> FilterResult:
     tpe = info.get("trailingPE")
     fpe = info.get("forwardPE")
     ev_ebitda = info.get("enterpriseToEbitda")
-    if not isinstance(ev_ebitda, (int, float)) or ev_ebitda > 200:
+    if not isinstance(ev_ebitda, (int, float)) or ev_ebitda > T["ev_ebitda_bad"]:
         ev_ebitda = None  # yfinance a veces mezcla monedas (ADRs) y devuelve basura
     eps = _row(fin, "Diluted EPS", "Basic EPS")
 

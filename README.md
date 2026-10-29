@@ -216,7 +216,9 @@ screener/
 ├── insiders.py          Módulo 1: Form 4
 ├── institutions.py      Módulo 2: 13F-HR
 ├── bottlenecks.py       texto libre: 8-K + 10-Q/10-K
-├── requirements.txt     yfinance, pandas, tabulate
+├── server.py            UI web local (Flask): ejecuta el screener y sirve web/
+├── web/                 index.html + app.js: las 4 pantallas de la UI
+├── requirements.txt     yfinance, pandas, tabulate, flask
 ├── tickers_ejemplo.txt  universo de prueba (9 tickers)
 ├── ejemplo_*.csv/.md    salida de referencia generada con ese universo
 ├── README.md            este documento
@@ -239,6 +241,19 @@ En `institutions.py`: lista `MANAGERS`, `STALE_DAYS` (200).
 En `bottlenecks.py`: `KEYWORDS`, `_NOISE_RE`, `MAX_SENTENCES` (8).
 
 En `edgar.py`: `MIN_INTERVAL` (0.2 s entre peticiones), `CACHE_DIR`.
+
+---
+
+## Interfaz web (opcional)
+
+Además de la línea de comandos hay una UI local con cuatro pantallas: Resumen, Detalle por ticker, Convergencia 13F y Nueva corrida (universo, módulos, umbrales editables y descarga de CSV/Markdown).
+
+```powershell
+pip install -r requirements.txt
+python server.py        # abre http://127.0.0.1:8765
+```
+
+El servidor solo escucha en `127.0.0.1` y rechaza peticiones de otros hosts. El User-Agent que escribas en la UI se usa durante la sesión y no se guarda.
 
 ---
 
