@@ -27,6 +27,7 @@ Para instrucciones de uso paso a paso, ver `USO.md`. Este documento es la refere
 6. [Umbrales configurables](#6-umbrales-configurables)
 7. [Interfaz web (opcional)](#7-interfaz-web-opcional)
 8. [User-Agent para EDGAR](#8-user-agent-para-edgar)
+9. [Fuente opcional: LSE](#9-fuente-opcional-lse)
 
 ---
 
@@ -150,7 +151,7 @@ Fuente: **EDGAR 8-K** (busca entre los últimos 10 un Exhibit 99.1 que parezca p
 | Ticker → CUSIP | Archivo fails-to-deliver de la SEC |
 | Cuellos de botella | 8-K Exhibit 99.1 y 10-Q / 10-K / 20-F |
 
-Ninguna fuente requiere cuenta ni API key. Yahoo Finance no es una API oficial: yfinance hace scraping y puede romperse con cambios del sitio.
+Ninguna fuente requiere cuenta ni API key (LSE es opcional, ver la sección 9). Yahoo Finance no es una API oficial: yfinance hace scraping y puede romperse con cambios del sitio.
 
 ---
 
@@ -236,6 +237,8 @@ screener/
 ├── insiders.py          Módulo 1: Form 4
 ├── institutions.py      Módulo 2: 13F-HR
 ├── bottlenecks.py       texto libre: 8-K + 10-Q/10-K
+├── lse.py               fuente opcional LSE: cruza márgenes de los filtros 1, 3 y 4
+├── tests/               pruebas sin red (python -m unittest discover -s tests)
 ├── server.py            UI web local (Flask): ejecuta el screener y sirve web/
 ├── web/                 index.html + app.js: las 4 pantallas de la UI
 ├── docs/                captura de la UI usada en este README
@@ -246,7 +249,8 @@ screener/
 ├── USO.md               guía de uso
 ├── .gitignore
 ├── .venv/               entorno virtual (no se versiona)
-└── .cache_edgar/        caché de descargas (no se versiona)
+├── .cache_edgar/        caché de descargas de EDGAR (no se versiona)
+└── .cache_lse/          caché de LSE, solo si usas LSE_KEY (no se versiona)
 ```
 
 ---
@@ -289,3 +293,27 @@ $env:SEC_USER_AGENT = "Nombre Apellido correo@dominio.com"
 ```
 
 Ese correo queda solo en el encabezado HTTP que recibe la SEC; no se escribe en ningún archivo del proyecto ni en la caché.
+
+---
+
+## 9. Fuente opcional: LSE
+
+[London Strategic Edge](https://londonstrategicedge.com) (LSE) es una **segunda fuente opcional** de fundamentales anuales (hasta ~10 años desde 2016). yfinance sigue siendo la fuente principal. Sin clave el screener funciona exactamente igual que antes y no hace falta cuenta ni API key.
+
+Qué hace: cruza el **margen operativo medio** (filtros 1 y 3) y el **margen FCF** del último año (filtro 4) con los de LSE, sobre los años fiscales que ambas fuentes tienen en común. Si difieren en más de **3 puntos porcentuales** agrega la nota `LSE difiere de yfinance` al detalle del filtro. **No cambia ningún veredicto PASS/WARN/FAIL**: solo agrega una nota. Si LSE no tiene el ticker, rechaza la clave (401) o no hay acceso (403/404), el detalle queda con la nota `LSE N/A: ...` y la corrida sigue.
+
+Activación (la clave se lee **solo** de la variable de entorno `LSE_KEY`):
+
+```powershell
+$env:LSE_KEY = "<tu clave>"
+python screener.py CVX ASML --out prueba
+python screener.py CVX --no-lse        # ignora LSE aunque la variable exista
+```
+
+Notas de uso:
+
+- **La clave nunca va en el código, en ejemplos ni en commits.** `.env` y `.cache_lse/` están en `.gitignore`. Si una clave se llega a pegar en un chat o un archivo, regenérala en el panel de LSE.
+- **Límites del plan gratis:** 60 llamadas por minuto y una descarga a la vez. El módulo procesa los tickers en serie, espera el header `Retry-After` ante un 429 y reintenta. Cada ticker pesa ~2 MB; los datos se guardan en `.cache_lse/` durante 90 días.
+- **Datos de LSE:** no se versionan. No subas CSV/Markdown generados con LSE activa (llevan cifras derivadas de sus datos) hasta leer sus términos de uso. Los `ejemplo_*` de este repo se generaron sin LSE.
+- **Diferencias esperadas:** LSE define `operatingIncome` distinto a yfinance, por eso solo se marca la divergencia y no se reemplaza. El margen FCF se calcula como flujo operativo − |inversión en PP&E| (`investmentsInPropertyPlantAndEquipment`, no `capitalExpenditure`, que viene redondeado en FY2020-21). Antes de 2011 los ceros de flujo de caja se tratan como datos faltantes. Si LSE reporta en otra moneda que USD, solo se comparan márgenes (no importes) y la nota lo indica.
+- **Estado de la validación:** la lógica está cubierta por pruebas sin red (`python -m unittest discover -s tests`). La comparación contra yfinance con tickers difíciles (ASML, RIVN, AVGO) requiere una clave real y se verifica aparte antes de confiar en los números.

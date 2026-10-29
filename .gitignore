@@ -14,3 +14,6 @@ prueba*.md
 
 # Configuración local (User-Agent con correo real para EDGAR)
 .env
+
+# Caché de LSE (segunda fuente opcional): datos con licencia de terceros, no se versionan
+.cache_lse/
