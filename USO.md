@@ -9,7 +9,7 @@ Esta guía es para usar la herramienta, no para modificarla. Para saber cómo fu
 Abrir PowerShell y entrar a la carpeta del screener:
 
 ```powershell
-cd "<ruta a la carpeta>\plan inversiones\screener"
+cd "<ruta a la carpeta>\screener"
 ```
 
 Si la carpeta `.venv` ya existe (es el caso en esta máquina), no hay que hacer nada más. Si no existe, o si se copió el proyecto a otra computadora:
