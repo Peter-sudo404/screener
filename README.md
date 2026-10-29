@@ -8,6 +8,26 @@ Para instrucciones de uso paso a paso, ver `USO.md`. Este documento es la refere
 
 > **Aviso legal.** Este proyecto es solo educativo e informativo. **No constituye asesoría financiera, de inversión, fiscal ni legal, ni una recomendación de comprar o vender ningún valor.** Los resultados (incluidos los de `ejemplo.md` y los archivos `ejemplo_*.csv`) son ilustrativos, se generan con datos gratuitos que pueden ser incompletos, erróneos o desactualizados, y no garantizan rendimientos futuros. Invertir implica riesgo de pérdida de capital. Usa el código bajo tu propio riesgo y consulta a un asesor profesional antes de tomar decisiones de inversión. El software se ofrece "tal cual", sin garantías (ver `LICENSE`).
 
+![Pantalla Resumen de la interfaz web, con el universo de ejemplo de 9 tickers](docs/screenshot-resumen.png)
+
+*Pantalla Resumen de la interfaz web (ver la sección 7), generada con `tickers_ejemplo.txt`.*
+
+## Índice
+
+1. [Arquitectura](#1-arquitectura)
+2. [Módulos](#2-módulos)
+   - [`edgar.py`: cliente EDGAR compartido](#edgarpy--cliente-edgar-compartido)
+   - [`screener.py`: los 5 filtros y la orquestación](#screenerpy--los-5-filtros-y-la-orquestación)
+   - [`insiders.py`: compras de insiders (Form 4)](#insiderspy--módulo-1-compras-de-insiders-form-4)
+   - [`institutions.py`: gestores institucionales (13F-HR)](#institutionspy--módulo-2-gestores-institucionales-13f-hr)
+   - [`bottlenecks.py`: cuellos de botella](#bottleneckspy--texto-libre-cuellos-de-botella)
+3. [Fuentes de datos, por dato](#3-fuentes-de-datos-por-dato)
+4. [Limitaciones y heurísticas](#4-limitaciones-y-heurísticas-lista-completa)
+5. [Estructura de archivos](#5-estructura-de-archivos)
+6. [Umbrales configurables](#6-umbrales-configurables)
+7. [Interfaz web (opcional)](#7-interfaz-web-opcional)
+8. [User-Agent para EDGAR](#8-user-agent-para-edgar)
+
 ---
 
 ## 1. Arquitectura
@@ -218,6 +238,7 @@ screener/
 ├── bottlenecks.py       texto libre: 8-K + 10-Q/10-K
 ├── server.py            UI web local (Flask): ejecuta el screener y sirve web/
 ├── web/                 index.html + app.js: las 4 pantallas de la UI
+├── docs/                captura de la UI usada en este README
 ├── requirements.txt     yfinance, pandas, tabulate, flask
 ├── tickers_ejemplo.txt  universo de prueba (9 tickers)
 ├── ejemplo_*.csv/.md    salida de referencia generada con ese universo
@@ -244,7 +265,7 @@ En `edgar.py`: `MIN_INTERVAL` (0.2 s entre peticiones), `CACHE_DIR`.
 
 ---
 
-## Interfaz web (opcional)
+## 7. Interfaz web (opcional)
 
 Además de la línea de comandos hay una UI local con cuatro pantallas: Resumen, Detalle por ticker, Convergencia 13F y Nueva corrida (universo, módulos, umbrales editables y descarga de CSV/Markdown).
 
@@ -257,7 +278,7 @@ El servidor solo escucha en `127.0.0.1` y rechaza peticiones de otros hosts. El 
 
 ---
 
-## 7. User-Agent para EDGAR
+## 8. User-Agent para EDGAR
 
 La política de acceso de la SEC pide que cada petición automatizada lleve un encabezado `User-Agent` con nombre y correo de contacto (`Nombre Apellido correo@dominio.com`). No verifican el correo, pero pueden bloquear tráfico sin identificación o con identificación claramente falsa.
 
