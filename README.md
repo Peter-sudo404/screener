@@ -239,6 +239,8 @@ screener/
 ├── server.py            UI web local (Flask): ejecuta el screener y sirve web/
 ├── web/                 index.html + app.js: las 4 pantallas de la UI
 ├── docs/                captura de la UI usada en este README
+├── Dockerfile           imagen de la UI y la CLI (python:3.13-slim, usuario sin privilegios)
+├── docker-compose.yml   puerto solo en 127.0.0.1, volumen de caché, carpeta salidas/
 ├── requirements.txt     yfinance, pandas, tabulate, flask
 ├── tickers_ejemplo.txt  universo de prueba (9 tickers)
 ├── ejemplo_*.csv/.md    salida de referencia generada con ese universo
@@ -275,6 +277,28 @@ python server.py        # abre http://127.0.0.1:8765
 ```
 
 El servidor solo escucha en `127.0.0.1` y rechaza peticiones de otros hosts. El User-Agent que escribas en la UI se usa durante la sesión y no se guarda.
+
+### Con Docker (sin instalar Python ni dependencias)
+
+Requiere Docker Desktop abierto. Desde la carpeta del proyecto:
+
+```powershell
+$env:SEC_USER_AGENT = "Nombre Apellido correo@dominio.com"   # opcional, ver sección 8
+docker compose up -d --build      # primera vez y cada vez que cambies el código
+# abre http://127.0.0.1:8765
+docker compose down               # detener (la caché se conserva)
+```
+
+Línea de comandos dentro del contenedor (los archivos quedan en la carpeta `salidas/` de tu máquina):
+
+```powershell
+docker compose run --rm screener python screener.py MSFT NVDA --out salidas/resultados
+```
+
+- El puerto se publica solo en `127.0.0.1`: el servidor no tiene autenticación, no lo expongas a la red.
+- La caché de EDGAR/13F (350+ MB) vive en el volumen `cache_edgar` y sobrevive a reinicios. Para borrarla: `docker compose down -v`.
+- En lugar de la variable de entorno puedes crear un archivo `.env` con `SEC_USER_AGENT=Nombre Apellido correo@dominio.com` (está en `.gitignore`).
+- El contenedor corre con un usuario sin privilegios (`app`), no como root.
 
 ---
 

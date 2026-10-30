@@ -1,0 +1,17 @@
+services:
+  screener:
+    build: .
+    image: screener:latest
+    ports:
+      # Solo tu máquina: el servidor no tiene autenticación, no lo expongas a la red
+      - "127.0.0.1:8765:8765"
+    environment:
+      # Se leen de tu shell o de un archivo .env (ignorado por git); vacío = valor por defecto
+      SEC_USER_AGENT: ${SEC_USER_AGENT:-}
+    volumes:
+      - cache_edgar:/app/.cache_edgar   # caché de EDGAR/13F (350+ MB): sobrevive entre corridas
+      - ./salidas:/app/salidas          # carpeta para los CSV/MD cuando usas la línea de comandos
+    restart: unless-stopped
+
+volumes:
+  cache_edgar:

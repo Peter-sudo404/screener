@@ -27,7 +27,10 @@ import insiders
 import institutions
 import screener
 
-HOST, PORT = "127.0.0.1", 8765
+# Por defecto solo localhost. En Docker se usa SCREENER_HOST=0.0.0.0 dentro del contenedor y el
+# puerto se publica únicamente en 127.0.0.1 del anfitrión (ver docker-compose.yml).
+HOST = os.environ.get("SCREENER_HOST", "127.0.0.1")
+PORT = int(os.environ.get("SCREENER_PORT", "8765"))
 WEB = Path(__file__).with_name("web")
 MAX_TICKERS = 40
 TICKER_RE = re.compile(r"^[A-Z][A-Z0-9]{0,5}([.\-][A-Z0-9]{1,3})?$")
@@ -443,7 +446,7 @@ def api_download(kind):
 
 
 if __name__ == "__main__":
-    url = f"http://{HOST}:{PORT}"
+    url = f"http://{'127.0.0.1' if HOST == '0.0.0.0' else HOST}:{PORT}"
     print(f"Screener UI en {url}  (Ctrl+C para salir)")
     if not os.environ.get("SCREENER_NO_BROWSER"):
         threading.Timer(1.0, lambda: webbrowser.open(url)).start()
