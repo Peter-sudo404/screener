@@ -14,7 +14,7 @@ import time
 import urllib.request
 from pathlib import Path
 
-SEC_UA = os.environ.get("SEC_USER_AGENT", "screener-personal contacto@example.com")
+SEC_UA = os.environ.get("SEC_USER_AGENT", "").strip() or "screener-personal contacto@example.com"
 HEADERS = {"User-Agent": SEC_UA, "Accept-Encoding": "gzip, deflate"}
 CACHE_DIR = Path(__file__).with_name(".cache_edgar")
 MIN_INTERVAL = 0.2  # segundos entre peticiones (5 req/s)
